@@ -1,4 +1,3 @@
-#include "draw.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
+#include "draw.h"
 #include "game.h"
 #include "map.h"
 #include "player.h"
@@ -29,7 +29,7 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   // TODO: handle window resizing.
   GLFWwindow *window =
-      glfwCreateWindow(512, 512, "Hello Square", nullptr, nullptr);
+    glfwCreateWindow(512, 512, "Hello Square", nullptr, nullptr);
   if (!window) {
     report_error("failed to create window");
     glfwTerminate();

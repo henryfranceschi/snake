@@ -15,6 +15,8 @@ Vec2I row_maj_position(size_t w, size_t i);
 size_t col_maj_index(size_t h, size_t x, size_t y);
 Vec2I col_maj_position(size_t h, size_t i);
 
+size_t new_capacity(size_t capacity);
+
 #define DBG_EXP(x)                                                             \
   printf(_Generic((x),                                                         \
          char *: "%s = %s\n",                                                  \

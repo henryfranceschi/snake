@@ -5,14 +5,12 @@
 #include <stdint.h>
 
 // Represents a point or direction in 2D space.
-typedef struct {
-  union {
-    struct {
-      int x;
-      int y;
-    };
-    int c[2];
+typedef union {
+  struct {
+    int x;
+    int y;
   };
+  int c[2];
 } Vec2I;
 
 #define VEC2I_ELEMENT_TYPE int

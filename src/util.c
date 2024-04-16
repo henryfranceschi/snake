@@ -33,6 +33,10 @@ int max(int a, int b) {
   return a > b ? a : b;
 }
 
+size_t new_capacity(size_t capacity) {
+  return capacity == 0 ? 8 : capacity * 2;
+}
+
 // Converts a position to a row major index.
 size_t row_maj_index(size_t w, size_t x, size_t y) {
   return w * y + x;

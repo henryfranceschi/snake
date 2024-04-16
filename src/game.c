@@ -4,6 +4,7 @@
 #include "game.h"
 #include "map.h"
 #include "player.h"
+#include "util.h"
 #include "vec.h"
 
 void game_init(Game *game) {
@@ -24,8 +25,7 @@ void game_free(Game *game) {
 
 void game_add_player(Game *game, Player player) {
   if (game->players_count == game->players_capacity) {
-    size_t capacity =
-        game->players_capacity == 0 ? 8 : game->players_capacity * 2;
+    size_t capacity = new_capacity(game->players_capacity);
     Player *players = realloc(game->players, capacity * sizeof(Player));
     if (players == nullptr) {
       fprintf(stderr, "failed to resize game players allocation");

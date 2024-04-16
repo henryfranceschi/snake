@@ -5,20 +5,21 @@
 #include <stdlib.h>
 
 #include "player.h"
+#include "util.h"
 #include "vec.h"
 
 // Resize the allocation storing the player's segments.
 static void resize(Player *player) {
-  size_t new_capacity = player->capacity == 0 ? 8 : player->capacity * 2;
+  size_t capacity = new_capacity(player->capacity);
   PlayerSegment *segments =
-      realloc(player->segments, new_capacity * sizeof(PlayerSegment));
+    realloc(player->segments, capacity * sizeof(PlayerSegment));
   if (segments == nullptr) {
     fprintf(stderr, "failed to resize player allocation\n");
     exit(EXIT_FAILURE);
   }
 
   player->segments = segments;
-  player->capacity = new_capacity;
+  player->capacity = capacity;
 }
 
 static inline size_t wrap_index(const Player *player, size_t index) {
@@ -68,17 +69,17 @@ void player_kill(Player *player) {
   player_init(player);
 }
 
-PlayerSegment* player_index(const Player *player, size_t index) {
+PlayerSegment *player_index(const Player *player, size_t index) {
   return &player->segments[physical_index(player, index)];
 }
 
 // Peek the first segment of the player.
-PlayerSegment* player_front(const Player *player) {
+PlayerSegment *player_front(const Player *player) {
   return &player->segments[physical_index(player, 0)];
 }
 
 // Peek the last segment of the player.
-PlayerSegment* player_back(const Player *player) {
+PlayerSegment *player_back(const Player *player) {
   return &player->segments[physical_index(player, player->count - 1)];
 }
 
@@ -88,8 +89,8 @@ void player_push_front(Player *player, PlayerSegment segment) {
 
   // Make sure the new segment is adjacent to the current tail in one of
   // the four cardinal directions except behind the head.
-  PlayerSegment* first = player_front(player);
-  PlayerSegment* second = player_index(player, 1);
+  PlayerSegment *first = player_front(player);
+  PlayerSegment *second = player_index(player, 1);
   if (!is_adjacent(segment.position, first->position) ||
       vec2i_eq(segment.position, second->position)) {
     fprintf(stderr, "new front segment not adjacent to old front");
@@ -105,8 +106,8 @@ void player_push_back(Player *player, PlayerSegment segment) {
   if (player->count == player->capacity)
     resize(player);
 
-  PlayerSegment* last = player_front(player);
-  PlayerSegment* second_to_last = player_index(player, player->count - 1);
+  PlayerSegment *last = player_front(player);
+  PlayerSegment *second_to_last = player_index(player, player->count - 1);
   if (!is_adjacent(segment.position, last->position) ||
       vec2i_eq(segment.position, second_to_last->position)) {
     fprintf(stderr, "new back segment not adjacent to old back");
@@ -125,7 +126,8 @@ PlayerSegment player_pop_front(Player *player) {
 }
 
 PlayerSegment player_pop_back(Player *player) {
-  PlayerSegment segment = player->segments[physical_index(player, player->count - 1)];
+  PlayerSegment segment =
+    player->segments[physical_index(player, player->count - 1)];
   --player->count;
   return segment;
 }
