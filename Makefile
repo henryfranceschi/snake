@@ -11,8 +11,8 @@ CC = clang
 INC_DIRS := $(shell find vendor -name include)
 INC_FLAGS := $(addprefix -I, $(INC_DIRS))
 
-CFLAGS := -g -Wall --std=c2x $(INC_FLAGS)
-LDFLAGS := -g --std=c2x -lglfw -lGL
+CFLAGS := -g -Wall -std=c23 $(INC_FLAGS)
+LDFLAGS := -g -std=c23 -lglfw -lGL
 
 $(BUILD_DIR)/$(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@

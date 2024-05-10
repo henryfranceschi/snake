@@ -1,56 +1,81 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "action.h"
 #include "game.h"
+#include "input.h"
 #include "map.h"
 #include "player.h"
 #include "util.h"
 #include "vec.h"
 
+void player_data_init(PlayerData *player_data) {
+  player_init(&player_data->player);
+  action_init(&player_data->current_action);
+  action_init(&player_data->previous_action);
+}
+
+void player_data_free(PlayerData *player_data) {
+  player_free(&player_data->player);
+  player_data_init(player_data);
+}
+
+void player_data_set_action(PlayerData *player_data, Action action) {
+  player_data->previous_action = player_data->current_action;
+  player_data->current_action = action;
+}
+
 void game_init(Game *game) {
-  game->players = nullptr;
-  game->players_capacity = 0;
-  game->players_count = 0;
+  game->player_data = nullptr;
+  game->player_capacity = 0;
+  game->player_count = 0;
   map_init(&game->map);
+  keymap_init(&game->keymap);
 }
 
 void game_free(Game *game) {
-  for (int i = 0; i < game->players_count; ++i) {
-    player_free(&game->players[i]);
+  for (int i = 0; i < game->player_count; ++i) {
+    player_data_free(&game->player_data[i]);
   }
-  free(game->players);
   map_free(&game->map);
+  keymap_free(&game->keymap);
   game_init(game);
 }
 
 void game_add_player(Game *game, Player player) {
-  if (game->players_count == game->players_capacity) {
-    size_t capacity = new_capacity(game->players_capacity);
-    Player *players = realloc(game->players, capacity * sizeof(Player));
-    if (players == nullptr) {
-      fprintf(stderr, "failed to resize game players allocation");
+  if (game->player_count == game->player_capacity) {
+    size_t capacity = new_capacity(game->player_capacity);
+    PlayerData *player_data =
+        realloc(game->player_data, capacity * sizeof(PlayerData));
+    if (player_data == nullptr) {
+      fprintf(stderr, "failed to resize game player_data allocation");
       exit(EXIT_FAILURE);
     }
 
-    game->players = players;
-    game->players_capacity = capacity;
+    game->player_data = player_data;
+    game->player_capacity = capacity;
   }
 
-  game->players[game->players_count++] = player;
+  PlayerData *player_data = &game->player_data[game->player_count++];
+  player_data_init(player_data);
+  player_data->player = player;
 }
 
-void game_update(Game *game, Vec2I direction) {
-  for (int i = 0; i < game->players_count; ++i) {
-    Player *player = &game->players[i];
+void game_update(Game *game) {
+  for (int i = 0; i < game->player_count; ++i) {
+    Player *player = &game->player_data[i].player;
+    Action *action = &game->player_data[i].current_action;
 
     if (!player->alive)
       return;
 
-    // Player's invariants guarantee that segments are adjacent to each other in
-    // one of the four cardinal directions, meaning the distance between any
-    // cell n and cell n + 1 is always equal to 1, and the difference between
-    // them is a normalised vector, representing in this case the direction the
-    // player is facing.
+    Vec2I direction = action_direction(*action);
+
+    // Player's invariants guarantee that segments are adjacent to each other
+    // in one of the four cardinal directions, meaning the distance between
+    // any cell n and cell n + 1 is always equal to 1, and the difference
+    // between them is a normalised vector, representing in this case the
+    // direction the player is facing.
     PlayerSegment *first = player_front(player);
     PlayerSegment *second = player_index(player, 1);
     Vec2I forward = vec2i_sub(first->position, second->position);
@@ -81,10 +106,10 @@ void game_update(Game *game, Vec2I direction) {
 
     // As it currently works, if two players are attempting to occupy a cell,
     // the one that is updated first will live and the other die. This isn't
-    // really fair, and should be fixed later. A better system would be to move
-    // all players, keeping track of their new positions, checking whether there
-    // was a colilision in any of the updated cells, and then killing the
-    // appropriate players.
+    // really fair, and should be fixed later. A better system would be to
+    // move all players, keeping track of their new positions, checking
+    // whether there was a colilision in any of the updated cells, and then
+    // killing the appropriate players.
     Cell head_cell = map_get_cell(&game->map, new_head.position);
     switch (head_cell.type) {
     case CELL_WALL:
@@ -99,5 +124,8 @@ void game_update(Game *game, Vec2I direction) {
     case CELL_EMPTY:
       break;
     }
+
+    // Clear action.
+    // game->actions[player->id].type = 0;
   }
 }

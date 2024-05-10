@@ -8,6 +8,7 @@
 
 #include "draw.h"
 #include "game.h"
+#include "input.h"
 #include "map.h"
 #include "player.h"
 #include "util.h"
@@ -16,7 +17,7 @@
 void report_error(const char *message);
 unsigned int create_shader(const char *source, GLenum type);
 unsigned int create_program(GLuint vs, GLuint fs);
-Vec2I get_player_input(GLFWwindow *window);
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 void draw(size_t indices_size);
 
 int main() {
@@ -72,10 +73,13 @@ int main() {
 
   glUseProgram(program);
 
+  glfwSetKeyCallback(window, key_callback);
+
   Game game;
   game_init(&game);
   {
     Map map;
+    // TODO: Add support for loading maps from file.
     map_init(&map);
     map_set_dimensions(&map, 32, 32);
     map_fill(&map, (Cell){CELL_EMPTY});
@@ -97,7 +101,9 @@ int main() {
     // TODO: Add support for multiple players.
     Player player;
     player_init(&player);
-    // Determine appropriate starting position for players.
+    player.id = 0;
+
+    // TODO: Determine appropriate starting position for players.
     const PlayerSegment first = {vec2i(map.width / 2, map.height / 2)};
     const PlayerSegment second = {vec2i(map.width / 2, map.height / 2 + 1)};
     player_spawn(&player, first, second);
@@ -109,7 +115,18 @@ int main() {
 
     game.map = map;
     game_add_player(&game, player);
+
+    KeyMap keymap;
+    keymap_init(&keymap);
+    keymap_map(&keymap, GLFW_KEY_UP, player.id, (Action){ACTION_MOVE_UP});
+    keymap_map(&keymap, GLFW_KEY_DOWN, player.id, (Action){ACTION_MOVE_DOWN});
+    keymap_map(&keymap, GLFW_KEY_LEFT, player.id, (Action){ACTION_MOVE_LEFT});
+    keymap_map(&keymap, GLFW_KEY_RIGHT, player.id, (Action){ACTION_MOVE_RIGHT});
+
+    game.keymap = keymap;
   }
+
+  glfwSetWindowUserPointer(window, &game);
 
   // Here we construct a matrix to fit the map into the viewport.
   float scale = 2.0 / max(game.map.width, game.map.height);
@@ -175,9 +192,9 @@ int main() {
 
     glfwPollEvents();
     if (current_time - last_update_time >= update_limit) {
-      game_update(&game, get_player_input(window));
-      for (int i = 0; i < game.players_count; ++i) {
-        map_player(&game.map, &game.players[i]);
+      game_update(&game);
+      for (int i = 0; i < game.player_count; ++i) {
+        map_player(&game.map, &game.player_data[i].player);
       }
       write_vertices(&game.map, vertices);
 
@@ -197,24 +214,19 @@ int main() {
   return 0;
 }
 
-Vec2I get_player_input(GLFWwindow *window) {
-  // TODO: The player should be able to press and release a button before an
-  // update, and have the input taken into account, currently if the button is
-  // not pressed when an update happens it is ignored.
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   // TODO: the player can obviously press multiple keys at once, in cases where
   // the user is pressing at most two keys that have at most a 90 degree
   // difference between them, we should alternate between moving the two
   // directions.
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    return VEC2I_UP;
-  } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    return VEC2I_LEFT;
-  } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    return VEC2I_DOWN;
-  } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    return VEC2I_RIGHT;
-  } else {
-    return VEC2I_ZERO;
+  Game *game = glfwGetWindowUserPointer(window);
+  {
+    unsigned int player_id;
+    Action action;
+    if (keymap_action(&game->keymap, key, &player_id, &action)) {
+      PlayerData *player_data = &game->player_data[player_id];
+      player_data_set_action(player_data, action);
+    }
   }
 }
 
