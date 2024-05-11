@@ -7,7 +7,7 @@
 char *read_to_string(const char *path) {
   FILE *f = fopen(path, "r");
   if (f == nullptr) {
-    fprintf(stderr, "failed to open file: %s", path);
+    fprintf(stderr, "failed to open file: %s\n", path);
     return nullptr;
   }
 

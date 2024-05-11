@@ -93,7 +93,7 @@ void player_push_front(Player *player, PlayerSegment segment) {
   PlayerSegment *second = player_index(player, 1);
   if (!is_adjacent(segment.position, first->position) ||
       vec2i_eq(segment.position, second->position)) {
-    fprintf(stderr, "new front segment not adjacent to old front");
+    fprintf(stderr, "new front segment not adjacent to old front\n");
     exit(EXIT_FAILURE);
   }
 
@@ -110,7 +110,7 @@ void player_push_back(Player *player, PlayerSegment segment) {
   PlayerSegment *second_to_last = player_index(player, player->count - 1);
   if (!is_adjacent(segment.position, last->position) ||
       vec2i_eq(segment.position, second_to_last->position)) {
-    fprintf(stderr, "new back segment not adjacent to old back");
+    fprintf(stderr, "new back segment not adjacent to old back\n");
     exit(EXIT_FAILURE);
   }
 

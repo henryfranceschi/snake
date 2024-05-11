@@ -48,7 +48,7 @@ void game_add_player(Game *game, Player player) {
     PlayerData *player_data =
         realloc(game->player_data, capacity * sizeof(PlayerData));
     if (player_data == nullptr) {
-      fprintf(stderr, "failed to resize game player_data allocation");
+      fprintf(stderr, "failed to resize game player_data allocation\n");
       exit(EXIT_FAILURE);
     }
 
