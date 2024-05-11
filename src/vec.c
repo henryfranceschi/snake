@@ -1,5 +1,4 @@
 #include "vec.h"
-#include "map.h"
 
 Vec2I vec2i(int x, int y) {
   Vec2I v;

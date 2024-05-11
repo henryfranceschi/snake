@@ -1,7 +1,6 @@
 #ifndef SNAKE_VEC_H
 #define SNAKE_VEC_H
 
-#include <math.h>
 #include <stdint.h>
 
 // Represents a point or direction in 2D space.

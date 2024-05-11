@@ -3,9 +3,7 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 
-#include "memory.h"
 #include "vec.h"
 
 // We just store the position of each segment as a Vec2I. As segments are

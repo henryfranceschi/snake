@@ -8,7 +8,6 @@
 #include "input.h"
 #include "map.h"
 #include "player.h"
-#include "vec.h"
 
 typedef struct {
   Player player;

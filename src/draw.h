@@ -2,7 +2,6 @@
 #define SNAKE_DRAW_H
 
 #include <stddef.h>
-#include <stdlib.h>
 
 #include "map.h"
 
