@@ -220,13 +220,11 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
   // difference between them, we should alternate between moving the two
   // directions.
   Game *game = glfwGetWindowUserPointer(window);
-  {
-    unsigned int player_id;
-    Action action;
-    if (keymap_action(&game->keymap, key, &player_id, &action)) {
-      PlayerData *player_data = &game->player_data[player_id];
-      player_data->current_action = action;
-    }
+  unsigned int player_id;
+  Action act;
+  if (action == GLFW_PRESS && keymap_action(&game->keymap, key, &player_id, &act)) {
+    PlayerData *player_data = &game->player_data[player_id];
+    player_data->current_action = act;
   }
 }
 
