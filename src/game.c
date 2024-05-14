@@ -20,11 +20,6 @@ void player_data_free(PlayerData *player_data) {
   player_data_init(player_data);
 }
 
-void player_data_set_action(PlayerData *player_data, Action action) {
-  player_data->previous_action = player_data->current_action;
-  player_data->current_action = action;
-}
-
 void game_init(Game *game) {
   game->player_data = nullptr;
   game->player_capacity = 0;
@@ -63,6 +58,7 @@ void game_add_player(Game *game, Player player) {
 
 void game_update(Game *game) {
   for (int i = 0; i < game->player_count; ++i) {
+    PlayerData *player_data = &game->player_data[i];
     Player *player = &game->player_data[i].player;
     Action *action = &game->player_data[i].current_action;
 
@@ -126,6 +122,7 @@ void game_update(Game *game) {
     }
 
     // Clear action.
-    // game->actions[player->id].type = 0;
+    player_data->previous_action = player_data->current_action;
+    action_init(&player_data->current_action);
   }
 }

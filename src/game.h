@@ -17,7 +17,6 @@ typedef struct {
 
 void player_data_init(PlayerData *player_data);
 void player_data_free(PlayerData *player_data);
-void player_data_set_action(PlayerData *player_data, Action action);
 
 typedef struct {
   // TODO: Currently we just store an array of data associated with each player,

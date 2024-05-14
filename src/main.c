@@ -225,7 +225,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     Action action;
     if (keymap_action(&game->keymap, key, &player_id, &action)) {
       PlayerData *player_data = &game->player_data[player_id];
-      player_data_set_action(player_data, action);
+      player_data->current_action = action;
     }
   }
 }
