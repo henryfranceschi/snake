@@ -66,15 +66,7 @@ void game_update(Game *game) {
       return;
 
     Vec2I direction = action_direction(*action);
-
-    // Player's invariants guarantee that segments are adjacent to each other
-    // in one of the four cardinal directions, meaning the distance between
-    // any cell n and cell n + 1 is always equal to 1, and the difference
-    // between them is a normalised vector, representing in this case the
-    // direction the player is facing.
-    PlayerSegment *first = player_front(player);
-    PlayerSegment *second = player_index(player, 1);
-    Vec2I forward = vec2i_sub(first->position, second->position);
+    Vec2I forward = player_head_forward(player);
 
     if (vec2i_eq(direction, VEC2I_ZERO)) {
       direction = forward;
@@ -88,7 +80,7 @@ void game_update(Game *game) {
     // Figure out which cell the player's new segment is in, and check for
     // collisions.
     PlayerSegment new_head = {
-        map_wrap_pos(&game->map, vec2i_add(first->position, direction))};
+        map_wrap_pos(&game->map, vec2i_add(player_front(player)->position, direction))};
     player_push_front(player, new_head);
     // Check if the player picked up a power-up last update. If so, we do not
     // remove the player's last segment.

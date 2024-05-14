@@ -131,3 +131,14 @@ PlayerSegment player_pop_back(Player *player) {
   --player->count;
   return segment;
 }
+
+Vec2I player_head_forward(const Player *player) {
+    // Player's invariants guarantee that segments are adjacent to each other
+    // in one of the four cardinal directions, meaning the distance between
+    // any cell n and cell n + 1 is always equal to 1, and the difference
+    // between them is a normalised vector, representing in this case the
+    // direction the player is facing.
+    PlayerSegment *first = player_front(player);
+    PlayerSegment *second = player_index(player, 1);
+    return vec2i_sub(first->position, second->position);
+}

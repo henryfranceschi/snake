@@ -44,4 +44,6 @@ void player_push_back(Player *player, PlayerSegment value);
 PlayerSegment player_pop_front(Player *player);
 PlayerSegment player_pop_back(Player *player);
 
+Vec2I player_head_forward(const Player *player);
+
 #endif // !SNAKE_PLAYER_H
