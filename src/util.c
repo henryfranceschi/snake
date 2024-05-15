@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "error.h"
 #include "util.h"
 
 char *read_to_string(const char *path) {
   FILE *f = fopen(path, "r");
   if (f == nullptr) {
-    fprintf(stderr, "failed to open file: %s\n", path);
+    report_error("failed to open file: %s", path);
     return nullptr;
   }
 

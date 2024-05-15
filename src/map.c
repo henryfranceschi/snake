@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "error.h"
 #include "map.h"
 #include "vec.h"
 
@@ -30,7 +31,7 @@ void map_set_dimensions(Map *map, size_t width, size_t height) {
   map->height = height;
   Cell *cells = realloc(map->cells, width * height * sizeof(Cell));
   if (cells == nullptr) {
-    fprintf(stderr, "failed to resize map allocation\n");
+    report_error("failed to resize map allocation");
     exit(EXIT_FAILURE);
   }
   map->cells = cells;

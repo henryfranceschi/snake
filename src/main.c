@@ -7,6 +7,7 @@
 #include <glad/gl.h>
 
 #include "draw.h"
+#include "error.h"
 #include "game.h"
 #include "input.h"
 #include "map.h"
@@ -14,7 +15,6 @@
 #include "util.h"
 #include "vec.h"
 
-void report_error(const char *message);
 unsigned int create_shader(const char *source, GLenum type);
 unsigned int create_program(GLuint vs, GLuint fs);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -170,14 +170,14 @@ int main() {
 
   Vertex *vertices = malloc(vertices_size);
   if (vertices == nullptr) {
-    fprintf(stderr, "failed to create vertices allocation\n");
+    report_error("failed to create vertices allocation");
     exit(EXIT_FAILURE);
   }
   write_vertices(&game.map, vertices);
 
   unsigned int *indices = malloc(indices_size);
   if (indices == nullptr) {
-    fprintf(stderr, "failed to create indices allocation\n");
+    report_error("failed to create indices allocation");
     exit(EXIT_FAILURE);
   }
   write_indices(&game.map, indices);
@@ -234,9 +234,6 @@ void draw(size_t indices_size) {
   glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, nullptr);
 }
 
-void report_error(const char *message) {
-  fprintf(stderr, "error:\n%s", message);
-}
 
 unsigned int create_shader(const char *source, GLenum type) {
   unsigned int handle = glCreateShader(type);
@@ -252,7 +249,7 @@ unsigned int create_shader(const char *source, GLenum type) {
 
     char *log = malloc(size);
     glGetShaderInfoLog(handle, size, nullptr, log);
-    fprintf(stderr, "failed to compile program:\n%s", log);
+    report_error("failed to compile program:\n%s", log);
     free(log);
 
     return 0;
@@ -281,7 +278,7 @@ unsigned int create_program(GLuint vs, GLuint fs) {
 
     char *log = malloc(size * sizeof(char));
     glGetProgramInfoLog(handle, size, nullptr, log);
-    fprintf(stderr, "failed to link program:\n%s", log);
+    report_error("failed to link program:\n%s", log);
 
     return 0;
   }

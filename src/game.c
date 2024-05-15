@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "action.h"
+#include "error.h"
 #include "game.h"
 #include "input.h"
 #include "map.h"
@@ -43,7 +44,7 @@ void game_add_player(Game *game, Player player) {
     PlayerData *player_data =
         realloc(game->player_data, capacity * sizeof(PlayerData));
     if (player_data == nullptr) {
-      fprintf(stderr, "failed to resize game player_data allocation\n");
+      report_error("failed to resize game player_data allocation");
       exit(EXIT_FAILURE);
     }
 
