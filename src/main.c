@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
+#include "config.h"
 #include "draw.h"
 #include "error.h"
 #include "game.h"
@@ -20,7 +21,13 @@ unsigned int create_program(GLuint vs, GLuint fs);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 void draw(size_t indices_size);
 
-int main() {
+int main(int argc, const char** argv) {
+  Config config;
+  config_init(&config);
+  if (!config_from_args(&config, argc, argv)) {
+    return EXIT_FAILURE;
+  }
+
   if (!glfwInit()) {
     return EXIT_FAILURE;
   }
