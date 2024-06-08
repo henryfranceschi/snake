@@ -7,9 +7,9 @@
 #include <glad/gl.h>
 
 #include "config.h"
-#include "draw.h"
 #include "error.h"
 #include "game.h"
+#include "geometry.h"
 #include "input.h"
 #include "map.h"
 #include "player.h"
@@ -146,51 +146,12 @@ int main(int argc, const char** argv) {
       {0.0, 0.0, 0.0, 1.0},
   };
 
-  unsigned int vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-  unsigned int vbo;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-  glVertexAttribPointer(0, 2, GL_INT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, pos));
-  glEnableVertexAttribArray(0);
-
-  glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void *)offsetof(Vertex, type));
-  glEnableVertexAttribArray(1);
-
-  unsigned int ebo;
-  glGenBuffers(1, &ebo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
   unsigned int matrix_location = glGetUniformLocation(program, "matrix");
   glUniformMatrix4fv(matrix_location, 1, GL_TRUE, &matrix[0][0]);
 
-  const unsigned int cell_count = game.map.width * game.map.height;
-
-  const unsigned int vertices_count = 4 * cell_count;
-  const unsigned int vertices_size = vertices_count * sizeof(Vertex);
-
-  const unsigned int indices_count = 6 * cell_count;
-  const unsigned int indices_size = indices_count * sizeof(unsigned int);
-
-  Vertex *vertices = malloc(vertices_size);
-  if (vertices == nullptr) {
-    report_error("failed to create vertices allocation");
-    exit(EXIT_FAILURE);
-  }
-  write_vertices(&game.map, vertices);
-
-  unsigned int *indices = malloc(indices_size);
-  if (indices == nullptr) {
-    report_error("failed to create indices allocation");
-    exit(EXIT_FAILURE);
-  }
-  write_indices(&game.map, indices);
-
-  glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_STATIC_DRAW);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, GL_STATIC_DRAW);
+  Geometry geometry;
+  geometry_init(&geometry);
+  geometry_from_map(&geometry, &game.map);
 
   double update_limit = 1.0 / 8;
   double last_update_time = 0.0;
@@ -203,20 +164,17 @@ int main(int argc, const char** argv) {
       for (int i = 0; i < game.player_count; ++i) {
         map_player(&game.map, &game.player_data[i].player);
       }
-      write_vertices(&game.map, vertices);
+      geometry_from_map(&geometry, &game.map);
 
-      glBufferSubData(GL_ARRAY_BUFFER, 0, vertices_size, vertices);
-
-      draw(indices_size);
+      draw(&geometry);
       glfwSwapBuffers(window);
       last_update_time = current_time;
     }
   }
 
   glfwTerminate();
+  geometry_free(&geometry);
   game_free(&game);
-  free(vertices);
-  free(indices);
 
   return 0;
 }
@@ -235,10 +193,12 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
   }
 }
 
-void draw(size_t indices_size) {
+void draw(const Geometry *geometry) {
+  glBindVertexArray(geometry->handle);
   glClear(GL_COLOR_BUFFER_BIT);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, geometry->indices.datum_count, GL_UNSIGNED_INT, nullptr);
+  glBindVertexArray(GL_NONE);
 }
 
 
