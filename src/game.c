@@ -70,12 +70,8 @@ void game_update(Game *game) {
     Vec2I direction = action_direction(*action);
     Vec2I forward = player_head_forward(player);
 
-    if (vec2i_eq(direction, VEC2I_ZERO)) {
-      direction = forward;
-    }
-
     // If the player is not attempting to turn, ignore the input.
-    if (vec2i_dot(forward, direction) != 0) {
+    if (vec2i_eq(direction, VEC2I_ZERO) || vec2i_dot(forward, direction) != 0) {
       direction = forward;
     }
 
