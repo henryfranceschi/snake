@@ -33,6 +33,7 @@ void game_free(Game *game) {
   for (int i = 0; i < game->player_count; ++i) {
     player_data_free(&game->player_data[i]);
   }
+  free(game->player_data);
   map_free(&game->map);
   keymap_free(&game->keymap);
   game_init(game);
