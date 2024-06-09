@@ -101,7 +101,6 @@ void game_update(Game *game) {
     case CELL_WALL:
     case CELL_PLAYER: {
       player->alive = false;
-      player_init(player);
     } break;
     case CELL_POWERUP: {
       PowerUpCell cell = head_cell.powerup;
