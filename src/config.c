@@ -39,7 +39,7 @@ static bool parse_uint(Config *cfg, ParseContext *ctx, unsigned int *out) {
     return false;
 
   const char *arg = ctx->chunks[ctx->cursor++];
-  unsigned int acc;
+  unsigned int acc = 0;
   for (int i = 0; i < strlen(arg); ++i) {
     char c = arg[i];
     if (c < '0' || c > '9') {
