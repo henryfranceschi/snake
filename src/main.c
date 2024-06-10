@@ -18,7 +18,7 @@
 unsigned int create_shader(const char *source, GLenum type);
 unsigned int create_program(GLuint vs, GLuint fs);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-void draw(size_t indices_size);
+void draw(const Geometry *geometry);
 
 int main(int argc, const char** argv) {
   Config config;
