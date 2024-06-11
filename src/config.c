@@ -12,10 +12,10 @@ void config_init(Config *config) {
 }
 
 // Returns false if the option is not recognized.
-static bool parse_short_option(const char *arg, OptionType *out) {
+static bool identify_short_option(const char *arg, OptionType *type) {
   switch (arg[0]) {
   case 'p':
-    *out = OPTION_PLAYER_COUNT;
+    *type = OPTION_PLAYER_COUNT;
     return true;
   default:
     return false;
@@ -23,13 +23,33 @@ static bool parse_short_option(const char *arg, OptionType *out) {
 }
 
 // Returns false if the option is not recognized.
-static bool parse_long_option(const char *arg, OptionType *out) {
+static bool identify_long_option(const char *arg, OptionType *type) {
   if (strcmp(arg, "player-count") == 0) {
-    *out = OPTION_PLAYER_COUNT;
+    *type = OPTION_PLAYER_COUNT;
     return true;
   } else {
     return false;
   }
+}
+
+static bool identify_option(const char *arg, OptionType *type) {
+  // Identify the option.
+  if (strncmp(arg, "--", 2) == 0) {
+    if (!identify_long_option(&arg[2], type)) {
+      return false;
+    }
+  } else if (strncmp(arg, "-", 1) == 0) {
+    // TODO: Handle flags.
+    if (!identify_short_option(&arg[1], type)) {
+      return false;
+    }
+  }
+  // If we encounter anything else in this position it is invalid.
+  else {
+    return false;
+  }
+
+  return true;
 }
 
 // Attempt to parse an unsigned int from the next argument. Only writes to out
@@ -55,6 +75,10 @@ static bool parse_uint(Config *cfg, ParseContext *ctx, unsigned int *out) {
 }
 
 static bool parse_option_value(Config *cfg, ParseContext *ctx, OptionType opt) {
+  if (ctx->cursor == ctx->chunk_count) {
+    return false;
+  }
+
   switch (opt) {
   case OPTION_PLAYER_COUNT: {
     bool success = parse_uint(cfg, ctx, &cfg->player_count);
@@ -71,27 +95,13 @@ bool config_from_args(Config *cfg, int argc, const char **argv) {
 
   while (ctx.cursor < ctx.chunk_count) {
     const char *arg = ctx.chunks[ctx.cursor++];
-    OptionType option;
-
-    // Identify the option.
-    if (strncmp(arg, "--", 2) == 0) {
-      if (!parse_long_option(&arg[2], &option)) {
-        report_error("unknown argument '%s'", arg);
-      }
-    }
-    else if (strncmp(arg, "-", 1) == 0) {
-      // TODO: Handle flags.
-      if (!parse_short_option(&arg[1], &option)) {
-        report_error("unknown argument '%s'", arg);
-      }
-    }
-    // If we encounter anything else in this position it is invalid.
-    else {
+    OptionType type;
+    if (!identify_option(arg, &type)) {
       report_error("unexpected argument '%s'", arg);
       return false;
     }
 
-    if (!parse_option_value(cfg, &ctx, option)) {
+    if (!parse_option_value(cfg, &ctx, type)) {
       return false;
     }
   }
