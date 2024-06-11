@@ -105,23 +105,28 @@ int main(int argc, const char** argv) {
     }
 
     // TODO: Add support for multiple players.
-    Player player;
-    player_init(&player);
-    player.id = 0;
-
     // TODO: Determine appropriate starting position for players.
-    const PlayerSegment first = {vec2i(map.width / 2, map.height / 2)};
-    const PlayerSegment second = {vec2i(map.width / 2, map.height / 2 + 1)};
-    player_spawn(&player, first, second);
-    map_player(&map, &player);
+    for (int i = 0; i < config.player_count; ++i) {
+      Player player;
+      player_init(&player);
+      player.id = i;
+
+      const int x_offset = (map.width / (config.player_count + 1)) * (i + 1);
+      const int y_offset = map.height / 2;
+      const PlayerSegment first = {vec2i(x_offset, y_offset)};
+      const PlayerSegment second = {vec2i(x_offset, y_offset + 1)};
+      player_spawn(&player, first, second);
+      map_player(&map, &player);
+      game_add_player(&game, player);
+    }
 
     // TODO: Add a proper system for spawning powerups.
     Cell power_up = {CELL_POWERUP, {.powerup = {5}}};
     map_set_cell(&map, vec2i(4, 4), power_up);
 
     game.map = map;
-    game_add_player(&game, player);
 
+    Player player = game.player_data[0].player;
     KeyMap keymap;
     keymap_init(&keymap);
     keymap_map(&keymap, GLFW_KEY_UP, player.id, (Action){ACTION_MOVE_UP});
